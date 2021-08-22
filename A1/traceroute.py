@@ -3,22 +3,19 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import sys
 
-# process = subprocess.Popen(['echo', 'More output'],
-#                      stdout=subprocess.PIPE, 
-#                      stderr=subprocess.PIPE)
-# stdout, stderr = process.communicate()
-#domain = input()
+domain = input()
 
 ip_addresses = []
 hop_num = []
 rtt = []
 i = 1
 max_hops = 100
+
 while(True):
     if i>max_hops:
         break
     print("Hop Number",i)
-    process = subprocess.Popen(['ping', '-m', str(i),'-c','10', 'www.google.com'], 
+    process = subprocess.Popen(['ping', '-m', str(i),'-c','10', domain], 
                            stdout=subprocess.PIPE,
                            universal_newlines=True)
     hop_num.append(i)
@@ -42,9 +39,9 @@ while(True):
     if temp[-1]=='ms':
         break
    
-
+######################################################################################
 for i in range(len(ip_addresses)):
-    print("Processing plot ",str(i)+"/"+str(len(ip_addresses)))
+    print("Processing plot ",str(i+1)+"/"+str(len(ip_addresses)))
     if ip_addresses[i]=='0':
         rtt.append(0)
         continue
@@ -55,6 +52,7 @@ for i in range(len(ip_addresses)):
     process.terminate()
     s = output[1].strip()
     temp = s.split(' ')
+    #print(temp)
     if temp[-1]=='0':
         rtt.append(0)
     else:
@@ -64,10 +62,11 @@ for i in range(len(ip_addresses)):
     #print(temp)
     #print(output[1].strip().split(' ')[3])
 
-plt.plot(hop_num, rtt)
-  
-plt.xlabel('Hop Number')
 
+#Plotting the Graph
+plt.plot(hop_num, rtt)
+ 
+plt.xlabel('Hop Number')
 plt.ylabel('RTT(ms)')
 
 plt.title('RTT vs Hop Number')
