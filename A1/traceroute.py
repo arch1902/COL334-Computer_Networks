@@ -58,6 +58,7 @@ for i in range(len(ip_addresses)):
     else:
         t = temp[6]
         rtt.append(float(t[5:]))
+        print(rtt[-1])
 
     #print(temp)
     #print(output[1].strip().split(' ')[3])
