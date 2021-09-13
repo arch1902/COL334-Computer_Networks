@@ -13,6 +13,9 @@ clients_send = {}
 clients_recv = {}
 
 def check(username):
+    for i in range(len(username)):
+        if not username[i].isdigit() and not username[i].isalpha():
+            return False
     return True
 
 def communicate(connectionSocket, addr):
@@ -29,19 +32,31 @@ def communicate(connectionSocket, addr):
                 
                 if temp[0]=='SEND':
                     recipient = temp[1]
-                    clients_recv[recipient].send(bytes('FORWARD '+username+'\n Content-length: '+temp[3]+' \n\n'+' '.join(temp[4:]),encoding='ascii'))
-                    message = clients_recv[recipient].recv(1024).decode("ascii")
-                    temp = message.split()
-                    print(temp)
-                    if temp[0]=='RECEIVED':
-                        sender = temp[1]
-                        clients_send[sender].send(bytes('SEND '+username+'\n \n',encoding='ascii'))
-                    elif temp[1]=='103':
-                        #clients[recipient].send(bytes('ERROR 103 Header Incomplete\n \n',encoding='ascii'))
-                        print('ERROR 103 Header Incomplete')
+                    if recipient == 'ALL':
+                        for i in clients_recv:
+                            clients_recv[i].send(bytes('FORWARD '+username+'\n Content-length: '+temp[3]+' \n\n'+' '.join(temp[4:]),encoding='ascii'))
+                            message = clients_recv[i].recv(1024).decode("ascii")
+                            temp_ = message.split()
+                            if temp_[0]=='RECEIVED':
+                                sender = temp_[1]
+                                clients_send[sender].send(bytes('SEND '+username+'\n \n',encoding='ascii'))
+                            elif temp_[1]=='103':
+                                print('ERROR 103 Header Incomplete')
+                            else:
+                                sender = temp_[1]
+                                clients_send[sender].send(bytes('ERROR 102 Unable to send\n \n',encoding='ascii'))
                     else:
-                        sender = temp[1]
-                        clients_send[sender].send(bytes('ERROR 102 Unable to send\n \n',encoding='ascii'))
+                        clients_recv[recipient].send(bytes('FORWARD '+username+'\n Content-length: '+temp[3]+' \n\n'+' '.join(temp[4:]),encoding='ascii'))
+                        message = clients_recv[recipient].recv(1024).decode("ascii")
+                        temp = message.split()
+                        if temp[0]=='RECEIVED':
+                            sender = temp[1]
+                            clients_send[sender].send(bytes('SEND '+username+'\n \n',encoding='ascii'))
+                        elif temp[1]=='103':
+                            print('ERROR 103 Header Incomplete')
+                        else:
+                            sender = temp[1]
+                            clients_send[sender].send(bytes('ERROR 102 Unable to send\n \n',encoding='ascii'))
 
         else:
             connectionSocket.send(bytes('REGISTERED TORECV '+username+'\n \n',encoding='ascii'))
