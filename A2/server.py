@@ -32,6 +32,9 @@ def communicate(connectionSocket, addr):
                 
                 if temp[0]=='SEND':
                     recipient = temp[1]
+                    if recipient not in clients_recv:
+                        connectionSocket.send(bytes('No such user registered! \n \n',encoding='ascii'))
+                        continue
                     if recipient == 'ALL':
                         for i in clients_recv:
                             clients_recv[i].send(bytes('FORWARD '+username+'\n Content-length: '+temp[3]+' \n\n'+' '.join(temp[4:]),encoding='ascii'))
@@ -46,7 +49,10 @@ def communicate(connectionSocket, addr):
                                 sender = temp_[1]
                                 clients_send[sender].send(bytes('ERROR 102 Unable to send\n \n',encoding='ascii'))
                     else:
-                        clients_recv[recipient].send(bytes('FORWARD '+username+'\n Content-length: '+temp[3]+' \n\n'+' '.join(temp[4:]),encoding='ascii'))
+                        msg = ' '.join(temp[4:])
+                        if len(msg)!=int(temp[3]):
+                            sys.exit()
+                        clients_recv[recipient].send(bytes('FORWARD '+username+'\n Content-length: '+temp[3]+' \n\n'+msg,encoding='ascii'))
                         message = clients_recv[recipient].recv(1024).decode("ascii")
                         temp = message.split()
                         if temp[0]=='RECEIVED':

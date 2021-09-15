@@ -49,6 +49,8 @@ def read_input():
             print('Message delivered to '+recipient)
         elif temp[1]=='103':
             print('Header Incomplete')
+        elif temp[0]=='No':
+            print('No such user registered!')
         else:
             print('Unable to send') 
             
